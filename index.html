@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wasteland Clicker</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #00ff99;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        button {
+            padding: 15px;
+            margin: 10px;
+            font-size: 16px;
+            background-color: black;
+            color: #00ff99;
+            border: 2px solid #00ff99;
+            cursor: pointer;
+        }
+
+        #log {
+            margin-top: 20px;
+            height: 150px;
+            overflow-y: scroll;
+            border: 1px solid #00ff99;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>☢️ Wasteland Clicker</h1>
+
+<p>Scrap: <span id="scrap">0</span></p>
+<p>Level: <span id="level">1</span></p>
+
+<button onclick="scavenge()">🔍 Scavenge</button>
+<button onclick="fight()">⚔️ Fight Enemy</button>
+<button onclick="build()">🏠 Build Settlement (50 scrap)</button>
+
+<div id="log"></div>
+
+<script>
+let scrap = 0;
+let level = 1;
+
+function updateUI() {
+    document.getElementById("scrap").innerText = scrap;
+    document.getElementById("level").innerText = level;
+}
+
+function log(text) {
+    const logBox = document.getElementById("log");
+    logBox.innerHTML += text + "<br>";
+    logBox.scrollTop = logBox.scrollHeight;
+}
+
+function scavenge() {
+    let found = Math.floor(Math.random() * 10) + 1;
+    scrap += found;
+    log("You scavenged " + found + " scrap.");
+    updateUI();
+}
+
+function fight() {
+    let win = Math.random();
+
+    if (win > 0.4) {
+        let reward = Math.floor(Math.random() * 20) + 5;
+        scrap += reward;
+        log("You defeated an enemy and gained " + reward + " scrap!");
+        level++;
+    } else {
+        let loss = Math.floor(Math.random() * 10);
+        scrap = Math.max(0, scrap - loss);
+        log("You got hurt and lost " + loss + " scrap...");
+    }
+
+    updateUI();
+}
+
+function build() {
+    if (scrap >= 50) {
+        scrap -= 50;
+        log("You built a settlement! Passive scrap increased.");
+        
+        setInterval(() => {
+            scrap += 2;
+            updateUI();
+        }, 3000);
+
+    } else {
+        log("Not enough scrap!");
+    }
+
+    updateUI();
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
