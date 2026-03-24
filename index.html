@@ -1,0 +1,157 @@
+import random
+
+# =========================
+# PLAYER SYSTEM
+# =========================
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.health = 100
+        self.level = 1
+        self.xp = 0
+        self.inventory = []
+        self.location = "Vault 111"
+
+    def show_stats(self):
+        print(f"\n{self.name} | HP: {self.health} | LVL: {self.level} | XP: {self.xp}")
+        print(f"Location: {self.location}")
+
+    def level_up(self):
+        if self.xp >= 100:
+            self.level += 1
+            self.xp = 0
+            self.health = 100
+            print(f"\n🎉 You leveled up! You are now level {self.level}!")
+
+
+# =========================
+# WORLD SYSTEM
+# =========================
+locations = [
+    "Abandoned City",
+    "Radiation Zone",
+    "Raider Camp",
+    "Old Vault",
+    "Settlement"
+]
+
+def explore(player):
+    new_location = random.choice(locations)
+    player.location = new_location
+    print(f"\n🌍 You travel to: {new_location}")
+
+    encounter = random.randint(1, 100)
+    if encounter > 50:
+        return "enemy"
+    else:
+        return "loot"
+
+
+# =========================
+# COMBAT SYSTEM
+# =========================
+enemies = [
+    {"name": "Raider", "hp": 30},
+    {"name": "Mutant", "hp": 50},
+    {"name": "Robot", "hp": 40}
+]
+
+def start_combat(player):
+    enemy = random.choice(enemies).copy()
+    print(f"\n⚠️ A {enemy['name']} appears!")
+
+    while enemy["hp"] > 0 and player.health > 0:
+        print(f"\nYour HP: {player.health} | {enemy['name']} HP: {enemy['hp']}")
+        action = input("Attack or Run? ").lower()
+
+        if action == "attack":
+            damage = random.randint(5, 15)
+            enemy["hp"] -= damage
+            print(f"You hit the {enemy['name']} for {damage} damage!")
+
+        elif action == "run":
+            print("🏃 You escaped!")
+            return
+
+        else:
+            print("Invalid action!")
+            continue
+
+        if enemy["hp"] > 0:
+            enemy_damage = random.randint(5, 12)
+            player.health -= enemy_damage
+            print(f"The {enemy['name']} hits you for {enemy_damage}!")
+
+    if player.health > 0:
+        print(f"\n✅ You defeated the {enemy['name']}!")
+        player.xp += 20
+        player.level_up()
+    else:
+        print("\n💀 You died...")
+
+
+# =========================
+# INVENTORY SYSTEM
+# =========================
+loot_items = ["Scrap Metal", "Medkit", "Ammo", "Weapon Parts"]
+
+def find_loot(player):
+    item = random.choice(loot_items)
+    player.inventory.append(item)
+    print(f"\n🎒 You found: {item}")
+
+def show_inventory(player):
+    print("\n📦 Inventory:")
+    if not player.inventory:
+        print("Empty")
+    else:
+        for item in player.inventory:
+            print(f"- {item}")
+
+
+# =========================
+# MAIN GAME LOOP
+# =========================
+def game_loop():
+    print("=== WASTELAND RPG ===")
+    name = input("Enter your character name: ")
+    player = Player(name)
+
+    print("\nYou emerge from Vault 111 into a ruined world...")
+
+    while player.health > 0:
+        player.show_stats()
+
+        print("\nChoose an action:")
+        print("1. Explore")
+        print("2. Inventory")
+        print("3. Quit")
+
+        choice = input("> ")
+
+        if choice == "1":
+            result = explore(player)
+
+            if result == "enemy":
+                start_combat(player)
+            else:
+                find_loot(player)
+
+        elif choice == "2":
+            show_inventory(player)
+
+        elif choice == "3":
+            print("👋 Goodbye!")
+            break
+
+        else:
+            print("Invalid choice!")
+
+    print("\n=== GAME OVER ===")
+
+
+# =========================
+# START GAME
+# =========================
+if __name__ == "__main__":
+    game_loop()
