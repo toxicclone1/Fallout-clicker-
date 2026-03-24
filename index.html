@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fallout: Settlement Manager</title>
+    <style>
+        :root { --p-green: #00ff41; --p-dark: #050505; --p-gold: #ffcc00; --p-blue: #0088ff; }
+        body { 
+            background-color: var(--p-dark); color: var(--p-green); 
+            font-family: 'Courier New', Courier, monospace; margin: 0; padding: 0;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Header & Secret */
+        #hud { border-bottom: 2px solid var(--p-green); padding: 15px; background: #000; position: sticky; top: 0; z-index: 100; }
+        .cap-count { font-size: 26px; color: var(--p-gold); margin: 0; cursor: pointer; }
+        
+        /* Tabs Navigation */
+        .tabs { display: flex; background: #111; border-bottom: 1px solid var(--p-green); }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: var(--p-green); font-family: inherit; font-weight: bold; font-size: 12px; }
+        .tab-btn.active { background: var(--p-green); color: #000; }
+
+        /* Content Areas */
+        .page { display: none; padding: 20px; padding-bottom: 100px; }
+        .page.active { display: block; }
+
+        /* Buttons & Items */
+        .btn { 
+            background: #111; border: 1px solid var(--p-green); color: var(--p-green);
+            padding: 15px; margin: 10px 0; width: 100%; text-align: left; border-radius: 5px;
+        }
+        .btn:active { background: #222; }
+        .price { color: var(--p-gold); float: right; }
+        .owned-tag { color: var(--p-blue); font-size: 10px; margin-left: 10px; }
+
+        /* Power Armor Customizer */
+        .garage-card { border: 2px solid var(--p-blue); padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+        .paint-swatch { display: inline-block; width: 30px; height: 30px; border: 1px solid white; margin: 5px; border-radius: 50%; }
+
+        /* Scavenge Button */
+        #clicker { height: 100px; border: 2px dashed var(--p-green); display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="hud">
+        <p class="cap-count" onclick="checkSecret()">CAPS: <span id="cap-text">0</span></p>
+        <small id="cps-text">Production: 0/sec</small>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openPage('scavenge')">SCAVENGE</button>
+        <button class="tab-btn" onclick="openPage('settlement')">SETTLEMENT</button>
+        <button class="tab-btn" onclick="openPage('garage')">GARAGE</button>
+    </div>
+
+    <div id="scavenge" class="page active">
+        <div id="clicker" onclick="manualClick()">TAP TO SCAVENGE</div>
+        <h3>MARKETPLACE</h3>
+        <div id="market-list"></div>
+    </div>
+
+    <div id="settlement" class="page">
+        <h3>WORKSHOP (DEFENSE & RESOURCES)</h3>
+        <div id="workshop-list"></div>
+    </div>
+
+    <div id="garage" class="page">
+        <h3>POWER ARMOR STATION</h3>
+        <div id="garage-content">Buy Power Armor in the Market to customize!</div>
+    </div>
+
+    <script>
+        let state = {
+            caps: 0,
+            secretClicks: 0,
+            counts: {}, 
+            inventory: [],
+            paCustoms: {} // Stores paint/upgrades for each PA owned
+        };
+
+        const MARKET = [
+            { id: 't45', name: "T-45 Power Armor", price: 2000, type: 'PA' },
+            { id: 't51', name: "T-51 Power Armor", price: 8000, type: 'PA' },
+            { id: 't60', name: "T-60 Power Armor", price: 25000, type: 'PA' },
+            { id: 'x01', name: "X-01 Power Armor", price: 75000, type: 'PA' }
+        ];
+
+        const WORKSHOP = [
+            { id: 'mutfruit', name: "Mutfruit Plant", price: 50, cps: 2 },
+            { id: 'water', name: "Water Purifier", price: 300, cps: 12 },
+            { id: 'wall', name: "Junk Wall", price: 500, cps: 5 }, // Defense adds a bit of CPS/value
+            { id: 'turret', name: "Machine Gun Turret", price: 1500, cps: 40 }
+        ];
+
+        const PA_PAINTS = [
+            { name: "Rusty", color: "#8B4513" },
+            { name: "Military", color: "#4B5320" },
+            { name: "Vault-Tec", color: "#0050b3" },
+            { name: "Institute", color: "#ffffff" },
+            { name: "Hot Rod Shark", color: "#ff4444" }
+        ];
+
+        function manualClick() { state.caps += 1; update(); }
+
+        function checkSecret() {
+            state.secretClicks++;
+            if(state.secretClicks === 10) {
+                state.caps += 10000;
+                alert("SECRET ACCESSED: +10,000 CAPS!");
+            }
+            update();
+        }
+
+        function buy(id, list) {
+            let item = list.find(i => i.id === id);
+            let currentCount = state.counts[id] || 0;
+            let price = Math.floor(item.price * Math.pow(1.2, currentCount));
+
+            if (state.caps >= price) {
+                state.caps -= price;
+                state.counts[id] = currentCount + 1;
+                if (item.type === 'PA') {
+                    state.inventory.push(item.name);
+                    state.paCustoms[item.name] = { paint: "Standard", mod: "None" };
+                }
+                update();
+            }
+        }
+
+        function openPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function setPaint(paName, paintName) {
+            state.paCustoms[paName].paint = paintName;
+            update();
+        }
+
+        function update() {
+            document.getElementById('cap-text').innerText = Math.floor(state.caps).toLocaleString();
+            
+            // Calc CPS
+            let totalCPS = WORKSHOP.reduce((sum, item) => sum + ((state.counts[item.id] || 0) * item.cps), 0);
+            document.getElementById('cps-text').innerText = "Production: " + totalCPS + "/sec";
+
+            // Render Market
+            let marketHTML = '';
+            MARKET.forEach(item => {
+                let owned = state.inventory.includes(item.name);
+                marketHTML += `<button class="btn" onclick="buy('${item.id}', MARKET)">
+                    ${item.name} ${owned ? '<span class="owned-tag">[OWNED]</span>' : ''}
+                    <span class="price">${item.price}c</span>
+                </button>`;
+            });
+            document.getElementById('market-list').innerHTML = marketHTML;
+
+            // Render Workshop
+            let workshopHTML = '';
+            WORKSHOP.forEach(item => {
+                let count = state.counts[item.id] || 0;
+                let price = Math.floor(item.price * Math.pow(1.2, count));
+                workshopHTML += `<button class="btn" onclick="buy('${item.id}', WORKSHOP)">
+                    ${item.name} (x${count}) <br><small>+${item.cps} cps</small>
+                    <span class="price">${price}c</span>
+                </button>`;
+            });
+            document.getElementById('workshop-list').innerHTML = workshopHTML;
+
+            // Render Garage
+            let garageHTML = '';
+            if (state.inventory.length === 0) {
+                garageHTML = "Visit the Market to buy your first suit of Power Armor!";
+            } else {
+                state.inventory.forEach(pa => {
+                    garageHTML += `<div class="garage-card">
+                        <h3>${pa}</h3>
+                        <p>Current Paint: <b>${state.paCustoms[pa].paint}</b></p>
+                        <div>Paints: ${PA_PAINTS.map(p => `
+                            <div class="paint-swatch" style="background:${p.color}" onclick="setPaint('${pa}', '${p.name}')"></div>
+                        `).join('')}</div>
+                        <p>Upgrades: <select onchange="state.paCustoms['${pa}'].mod = this.value; update()">
+                            <option>Standard Lining</option>
+                            <option>Jet Pack</option>
+                            <option>Motion Assist Servos</option>
+                            <option>Tesla Coils</option>
+                        </select></p>
+                    </div>`;
+                });
+            }
+            document.getElementById('garage-content').innerHTML = garageHTML;
+        }
+
+        setInterval(() => {
+            let totalCPS = WORKSHOP.reduce((sum, item) => sum + ((state.counts[item.id] || 0) * item.cps), 0);
+            state.caps += totalCPS / 10;
+            update();
+        }, 100);
+
+        update();
+    </script>
+</body>
+</html>
