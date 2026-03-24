@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SATO Clicker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            background-attachment: fixed;
+            color: #00ff41;
+            min-height: 250vh;
+            overflow-x: hidden;
+            padding: 20px 20px 50px 20px;
+            position: relative;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="%2300ff41" stroke="%23ffffff" stroke-width="2"/></svg>') 16 16, auto;
+        }
+       
+        .header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.95);
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: 2px solid #00ff41;
+            box-shadow:
+                0 0 30px #00ff41,
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            animation: headerGlow 3s ease-in-out infinite alternate;
+        }
+       
+        @keyframes headerGlow {
+            0% { box-shadow: 0 0 30px #00ff41, inset 0 0 20px rgba(0, 255, 65, 0.1); }
+            100% { box-shadow: 0 0 50px #00d4ff, inset 0 0 30px rgba(0, 212, 255, 0.2); }
+        }
+       
+        .spotify-link {
+            color: #1db954;
+            font-size: 1.3em;
+            font-weight: 700;
+            text-decoration: none;
+            text-shadow: 0 0 10px #1db954;
+            display: inline-block;
+            padding: 8px 20px;
+            border: 2px solid #1db954;
+            border-radius: 20px;
+            background: linear-gradient(45deg, rgba(29, 185, 84, 0.2), rgba(29, 185, 84, 0.1));
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+       
+        .spotify-link::before {
+            content: '🎵';
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+       
+        .spotify-link:hover {
+            background: linear-gradient(45deg, rgba(29, 185, 84, 0.4), rgba(29, 185, 84, 0.3));
+            box-shadow: 0 0 25px #1db954;
+            transform: scale(1.05);
+            text-shadow: 0 0 20px #1db954;
+        }
+       
+        .spotify-link:active {
+            transform: scale(0.98);
+        }
+       
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(0,255,65,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0,212,255,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255,0,255,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255,107,0,0.1) 0%, transparent 50%);
+            animation: bgShift 20s ease-in-out infinite;
+            z-index: -1;
+        }
+       
+        @keyframes bgShift {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10px, -10px) scale(1.1); }
+            66% { transform: translate(-10px, 10px) scale(1.05); }
+        }
+       
+        .section {
+            max-width: 900px;
+            margin: 150px auto 100px auto; /* Extra top margin for fixed header */
+            padding: 40px;
+            background: rgba(10, 10, 15, 0.95);
+            border-radius: 25px;
+            border: 3px solid #00ff41;
+            box-shadow:
+                0 0 40px #00ff41,
+                inset 0 0 40px rgba(0, 255, 65, 0.1);
+            position: relative;
+            animation: sectionFloat 6s ease-in-out infinite;
+            transform-style: preserve-3d;
+            backdrop-filter: blur(10px);
+        }
+       
+        @keyframes sectionFloat {
+            0%, 100% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-10px) rotateX(2deg); }
+        }
+       
+        .section:nth-child(even) {
+            border-color: #00d4ff;
+            box-shadow:
+                0 0 40px #00d4ff,
+                inset 0 0 40px rgba(0, 212, 255, 0.1);
+            background: rgba(10, 15, 20, 0.95);
+        }
+       
+        .section h2 {
+            font-size: 3em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #00ff41, #00d4ff, #ff00ff, #00ff41);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: neonGlow 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 25px #00ff41;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+       
+        .section h2:hover {
+            filter: hue-rotate(180deg) drop-shadow(0 0 60px #ff00ff);
+            transform: scale(1.05);
+        }
+       
+        @keyframes neonGlow {
+            0% { filter: hue-rotate(0deg) drop-shadow(0 0 25px #00ff41); }
+            100% { filter: hue-rotate(360deg) drop-shadow(0 0 45px #00d4ff); }
+        }
+       
+        .name-input-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+       
+        #nameInput {
+            font-size: 1.5em;
+            font-family: 'Orbitron', monospace;
+            padding: 15px 25px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            color: #00ff41;
+            text-align: center;
+            width: 300px;
+            margin: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+        }
+       
+        #nameInput:focus {
+            outline: none;
+            box-shadow: 0 0 25px #00ff41;
+            border-color: #ff00ff;
+        }
+       
+        #submitName {
+            font-size: 1.5em;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff00ff, #ff4080);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 20px #ff00ff;
+            margin: 10px;
+        }
+       
+        #submitName:hover {
+            box-shadow: 0 0 35px #00ff41;
+            transform: scale(1.05);
+        }
+       
+        .name-status {
+            font-size: 1.3em;
+            margin-top: 10px;
+            min-height: 30px;
+        }
+       
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+       
+        .stat {
+            text-align: center;
+        }
+       
+        .game-container {
+            text-align: center;
+        }
+       
+        #fame {
+            font-size: 3.5em;
+            font-weight: 900;
+            margin: 30px 0;
+            color: #00ff41;
+            text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41;
+            animation: famePulse 1.5s ease-in-out infinite;
+            letter-spacing: 5px;
+            user-select: none;
+        }
+       
+        @keyframes famePulse {
+            0%, 100% { text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41; }
+            50% { text-shadow: 0 0 35px #ff00ff, 0 0 70px #ff00ff; }
+        }
+       
+        #sato-btn {
+            font-size: 6em;
+            font-weight: 900;
+            padding: 30px 60px;
+            background: linear-gradient(45deg, #ff0040, #ff4080, #ff00ff, #ff4080);
+            background-size: 300% 300%;
+            animation: btnGradient 3s ease infinite;
+            border: 5px solid #00ff41;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow:
+                0 0 40px #ff0040,
+                0 0 80px #ff00ff,
+                inset 0 0 40px rgba(255, 0, 64, 0.4);
+            margin: 30px 0;
+            position: relative;
+            text-shadow: 0 0 15px #000000;
+            color: #ffffff;
+            letter-spacing: 3px;
+        }
+       
+        @keyframes btnGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+       
+        #sato-btn:hover {
+            box-shadow:
+                0 0 70px #ff00ff,
+                0 0 120px #00ff41,
+                inset 0 0 70px rgba(255, 0, 255, 0.6);
+            transform: scale(1.08);
+        }
+       
+        #sato-btn:active {
+            animation: shake 0.15s ease-in-out;
+        }
+       
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1.08); }
+            25% { transform: translateX(-8px) scale(1.08); }
+            75% { transform: translateX(8px) scale(1.08); }
+        }
+       
+        .upgrades {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 40px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+       
+        .upgrade {
+            font-size: 1.2em;
+            font-weight: 700;
+            padding: 18px 20px;
+            background: linear-gradient(45deg, #00d4ff, #0080ff, #00d4ff);
+            background-size: 300% 300%;
+            animation: upgradeGradient 4s ease infinite;
+            border: 3px solid #ff00ff;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow:
+                0 0 25px #00d4ff,
+                inset 0 0 25px rgba(0, 212, 255, 0.4);
+            text-shadow: 0 0 10px #000000;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.3;
+            position: relative;
+            overflow: hidden;
+        }
+       
+        .upgrade::before {
+            content: attr(data-count) "x";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.8em;
+            color: #ff6b00;
+            text-shadow: none;
+        }
+       
+        @keyframes upgradeGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+       
+        .upgrade:hover:not(:disabled) {
+            box-shadow:
+                0 0 50px #ff00ff,
+                0 0 80px #00ff41,
+                inset 0 0 50px rgba(255, 0, 255, 0.6);
+            transform: scale(1.08) rotate(1deg);
+        }
+       
+        .upgrade:disabled {
+            background: #1a1a1a;
+            border-color: #444;
+            cursor: not-allowed;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            color: #666;
+            text-shadow: none;
+            transform: none;
+        }
+       
+        .upgrade.auto-clicker {
+            background: linear-gradient(45deg, #ff6b00, #ff9500, #ff6b00) !important;
+            border-color: #00ff41 !important;
+            animation: autoPulse 1.5s ease infinite !important;
+        }
+       
+        @keyframes autoPulse {
+            0%, 100% { box-shadow: 0 0 25px #ff6b00; }
+            50% { box-shadow: 0 0 45px #00ff41, 0 0 70px #ff00ff; }
+        }
+       
+        #play-btn {
+            font-size: 3em;
+            font-weight: 900;
+            padding: 25px 60px;
+            background: linear-gradient(45deg, #ff6b00, #ff9500, #ff6b00);
+            background-size: 300% 300%;
+            animation: playGradient 2.5s ease infinite;
+            border: 4px solid #00ff41;
+            border-radius: 30px;
+            cursor: pointer;
+            color: #ffffff;
+            box-shadow: 0 0 40px #ff6b00;
+            text-shadow: 0 0 15px #000000;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+        }
+       
+        @keyframes playGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+       
+        #play-btn:hover {
+            box-shadow: 0 0 70px #00ff41, 0 0 120px #ff00ff;
+            transform: scale(1.15);
+        }
+       
+        .hidden {
+            display: none;
+        }
+       
+        .flash {
+            animation: neonFlash 0.5s ease-in-out;
+        }
+       
+        @keyframes neonFlash {
+            0%, 100% {
+                filter: brightness(1.8) hue-rotate(0deg);
+                box-shadow: 0 0 100px #00ff41 !important;
+            }
+            25% {
+                filter: brightness(2.2) hue-rotate(90deg);
+                box-shadow: 0 0 150px #00d4ff !important;
+            }
+            50% {
+                filter: brightness(2.5) hue-rotate(180deg);
+                box-shadow: 0 0 200px #ff00ff !important;
+            }
+            75% {
+                filter: brightness(2.2) hue-rotate(270deg);
+                box-shadow: 0 0 150px #ff6b00 !important;
+            }
+        }
+       
+        .scroll-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff41;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px #00ff41;
+            animation: bounce 2s infinite;
+        }
+       
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+       
+        .secret-unlocked {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #ff6b00;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 100px #ff6b00;
+            z-index: 1001;
+            animation: secretPop 0.5s ease-out;
+            font-size: 2em;
+        }
+       
+        @keyframes secretPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="https://open.spotify.com/artist/5bOuCkfXVn8c5r4qKKA1qR?si=zWlscXOnTXGuQfUwllK7tQ"
+           target="_blank" class="spotify-link" title="Listen to SATO on Spotify">
+           SATO on Spotify
+        </a>
+    </div>
+   
+    <div class="scroll-hint">↓ SCROLL TO EXPLORE SATO ↓</div>
+   
+    <div class="section">
+        <h2 id="title" data-clicks="0">SATO</h2>
+       
+        <div class="stats hidden" id="stats">
+            <div class="stat">
+                <div>Click Power</div>
+                <div id="clickPower" style="font-size: 1.5em; color: #00ff41;">1</div>
+            </div>
+            <div class="stat">
+                <div>Auto/sec</div>
+                <div id="autoPerSec" style="font-size: 1.5em; color: #ff6b00;">0</div>
+            </div>
+            <div class="stat">
+                <div>Total Clicks</div>
+                <div id="totalClicks" style="font-size: 1.5em; color: #00d4ff;">0</div>
+            </div>
+        </div>
+       
+        <div class="name-input-section">
+            <input type="text" id="nameInput" placeholder="Enter your name..." maxlength="20">
+            <br>
+            <button id="submitName">ENTER</button>
+            <div id="nameStatus" class="name-status"></div>
+        </div>
+       
+        <div class="game-container">
+            <button id="play-btn">▶ PLAY</button>
+           
+            <div id="game" class="hidden">
+                <div id="fame">FAME: 0</div>
+                <button id="sato-btn">🖱️ SATO 🖱️</button>
+               
+                <div class="upgrades">
+                    <button class="upgrade" data-upgrade="behind" data-basecost="50" data-value="2" data-count="0">
+                        🔒 BEHIND CLOSED DOORS
+                    </button>
+                    <button class="upgrade" data-upgrade="fishing" data-basecost="250" data-value="5" data-count="0">
+                        🎣 FISHING WHILE FISHING
+                    </button>
+                    <button class="upgrade" data-upgrade="burnt" data-basecost="1000" data-value="15" data-count="0">
+                        🔥 BURNT
+                    </button>
+                    <button class="upgrade" data-upgrade="sole" data-basecost="5000" data-value="50" data-count="0">
+                        👟 SOLE SAVIOR
+                    </button>
+                    <button class="upgrade" data-upgrade="4v1" data-basecost="25000" data-value="200" data-count="0">
+                        ⚔️ 4V1
+                    </button>
+                    <button class="upgrade" data-upgrade="shamrock" data-basecost="100000" data-value="1000" data-count="0">
+                        🍀 SHAMROCK SHIT SHOW
+                    </button>
+                    <button class="upgrade hidden" id="autoClickerBtn" data-upgrade="auto" data-basecost="10000" data-value="1" data-count="0">
+                        🤖 SECRET AUTO-CLICKER
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fame = 0;
+        let clickValue = 1;
+        let totalClicks = 0;
+        let autoClickers = 0;
+        let gameStarted = false;
+        let playerName = '';
+        let fameClicks = 0;
+        let lastUpdate = 0;
+        let gameLoop;
+
+        const fameDisplay = document.getElementById('fame');
+        const satoBtn = document.getElementById('sato-btn');
+        const playBtn = document.getElementById('play-btn');
+        const gameDiv = document.getElementById('game');
+        const nameInput = document.getElementById('nameInput');
+        const submitName = document.getElementById('submitName');
+        const nameStatus = document.getElementById('nameStatus');
+        const title = document.getElementById('title');
+        const statsDiv = document.getElementById('stats');
+        const clickPowerDisplay = document.getElementById('clickPower');
+        const autoPerSecDisplay = document.getElementById('autoPerSec');
+        const totalClicksDisplay = document.getElementById('totalClicks');
+
+        // Upgrades data
+        const upgrades = {
+            behind: { baseCost: 50, value: 2, count: 0 },
+            fishing: { baseCost: 250, value: 5, count: 0 },
+            burnt: { baseCost: 1000, value: 15, count: 0 },
+            sole: { baseCost: 5000, value: 50, count: 0 },
+            '4v1': { baseCost: 25000, value: 200, count: 0 },
+            shamrock: { baseCost: 100000, value: 1000, count: 0 },
+            auto: { baseCost: 10000, value: 1, count: 0, unlocked: false }
+        };
+
+        // Satisfying multi-layered click sound
+        function playClickSound(frequency = 800, volume = 0.4) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+           
+            // Layer 1: Main sharp click
+            const osc1 = audioContext.createOscillator();
+            const gain1 = audioContext.createGain();
+            osc1.connect(gain1);
+            gain1.connect(audioContext.destination);
+            osc1.frequency.value = frequency;
+            osc1.type = 'square';
+            gain1.gain.setValueAtTime(volume, audioContext.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
+            osc1.start(audioContext.currentTime);
+            osc1.stop(audioContext.currentTime + 0.08);
+           
+            // Layer 2: Lower bass thump
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            osc2.frequency.value = frequency * 0.5;
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(volume * 0.6, audioContext.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            osc2.start(audioContext.currentTime);
+            osc2.stop(audioContext.currentTime + 0.15);
+           
+            // Layer 3: High sparkle
+            const osc3 = audioContext.createOscillator();
+            const gain3 = audioContext.createGain();
+            osc3.connect(gain3);
+            gain3.connect(audioContext.destination);
+            osc3.frequency.value = frequency * 2;
+            osc3.type = 'sawtooth';
+            gain3.gain.setValueAtTime(volume * 0.3, audioContext.currentTime);
+            gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.06);
+            osc3.start(audioContext.currentTime);
+            osc3.stop(audioContext.currentTime + 0.06);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            if (Math.abs(e.deltaY) > 50) {
+                playClickSound(400, 0.2);
+            }
+        });
+
+        // FAME click counter for secret
+        title.addEventListener('click', () => {
+            fameClicks++;
+            title.dataset.clicks = fameClicks;
+            playClickSound(1200, 0.3);
+           
+            if (fameClicks >= 10 && !upgrades.auto.unlocked) {
+                showSecretUnlock();
+                document.getElementById('autoClickerBtn').classList.remove('hidden');
+                upgrades.auto.unlocked = true;
+            }
+        });
+
+        function showSecretUnlock() {
+            const popup = document.createElement('div');
+            popup.className = 'secret-unlocked';
+            popup.innerHTML = '🤖 SECRET UNLOCKED!<br>AUTO-CLICKER NOW IN SHOP!<br>Click FAME 10x to unlock secrets!';
+            document.body.appendChild(popup);
+           
+            setTimeout(() => {
+                popup.remove();
+            }, 4000);
+        }
+
+        submitName.addEventListener('click', checkName);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkName();
+        });
+
+        function checkName() {
+            const inputName = nameInput.value.trim().toLowerCase();
+            if (inputName === 'will peter' || inputName === 'sam') {
+                fame += 100000;
+                playerName = nameInput.value;
+                nameStatus.textContent = `🎉 ${playerName.toUpperCase()}! +100K FAME! 🎉`;
+                nameStatus.style.color = '#00ff41';
+                nameStatus.style.textShadow = '0 0 15px #00ff41';
+                playClickSound(1200, 0.6);
+            } else {
+                playerName = nameInput.value || 'ANONYMOUS';
+                nameStatus.textContent = `Welcome ${playerName.toUpperCase()}!`;
+                nameStatus.style.color = '#00d4ff';
+            }
+            nameInput.disabled = true;
+            submitName.disabled = true;
+            nameInput.style.opacity = '0.5';
+            updateDisplay();
+        }
+
+        playBtn.addEventListener('click', startGame);
+        satoBtn.addEventListener('click', clickSato);
+
+        document.querySelectorAll('.upgrade').forEach(btn => {
+            btn.addEventListener('click', () => buyUpgrade(btn.dataset.upgrade));
+        });
+
+        function startGame() {
+            gameStarted = true;
+            gameDiv.classList.remove('hidden');
+            playBtn.style.display = 'none';
+            statsDiv.classList.remove('hidden');
+            startAutoClicker();
+            playClickSound(600, 0.5);
+        }
+
+        function clickSato() {
+            fame += clickValue;
+            totalClicks++;
+            updateDisplay();
+            playClickSound(850 + Math.random() * 150, 0.45);
+           
+            satoBtn.style.transform = 'scale(0.92) rotate(8deg)';
+            satoBtn.style.boxShadow = '0 0 100px #ff00ff, 0 0 150px #00ff41';
+            setTimeout(() => {
+                satoBtn.style.transform = 'scale(1) rotate(0deg)';
+                satoBtn.style.boxShadow = '';
+            }, 150);
+        }
+
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades[upgradeId];
+            if (!upgrade.unlocked) return;
+           
+            const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.count));
+           
+            if (fame >= cost) {
+                fame -= cost;
+                if (upgradeId === 'auto') {
+                    autoClickers += upgrade.value;
+                } else {
+                    clickValue += upgrade.value;
+                }
+                upgrade.count++;
+               
+                document.body.classList.add('flash');
+                playClickSound(1100 + Math.random() * 200, 0.5);
+                setTimeout(() => {
+                    document.body.classList.remove('flash');
+                }, 500);
+               
+                updateDisplay();
+            }
+        }
+
+        function startAutoClicker() {
+            function autoLoop(currentTime) {
+                if (currentTime - lastUpdate >= 1000) {
+                    fame += autoClickers;
+                    lastUpdate = currentTime;
+                }
+                gameLoop = requestAnimationFrame(autoLoop);
+            }
+            gameLoop = requestAnimationFrame(autoLoop);
+        }
+
+        function updateDisplay() {
+            fameDisplay.textContent = `FAME: ${Math.floor(fame).toLocaleString()}`;
+            clickPowerDisplay.textContent = clickValue.toLocaleString();
+            autoPerSecDisplay.textContent = autoClickers;
+            totalClicksDisplay.textContent = totalClicks.toLocaleString();
+           
+            document.querySelectorAll('.upgrade').forEach(btn => {
+                const upgradeId = btn.dataset.upgrade;
+                const upgrade = upgrades[upgradeId];
+                if (!upgrade.unlocked && upgradeId !== 'auto') return;
+               
+                const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.count));
+                btn.dataset.count = upgrade.count;
+                btn.innerHTML = `${btn.dataset.upgrade.toUpperCase().replace('4V1', '4V1')}<br>+${upgrade.value} (${cost.toLocaleString()})`;
+                btn.disabled = fame < cost;
+               
+                if (upgradeId === 'auto') {
+                    btn.classList.toggle('auto-clicker', upgrade.unlocked);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
